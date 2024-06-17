@@ -16,14 +16,27 @@ volatile int version = 0;
 volatile int board[18][9];
 /* for start */
 unsigned char text_array[][8] = {
-	{0x7e,0x7e,0x5a,0x18,0x18,0x18,0x3c,0x00}, // T
-	{0x7e,0x46,0x16,0x1e,0x16,0x46,0x7e,0x00}, // E
-	{0x7e,0x7e,0x5a,0x18,0x18,0x18,0x3c,0x00}, // T
-	{0x7f,0x66,0x66,0x3e,0x36,0x66,0xc6,0x00}, // R
-	{0x3c,0x18,0x18,0x18,0x18,0x18,0x3c,0x00}, // I
-	{0x3e,0x63,0x46,0x1c,0x30,0x63,0x3e,0x00}, // S 
-	{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}  // _
+	{0x00,0xe0,0xc2,0xfe,0xfe,0xc2,0xe0,0x00}, // T
+	{0x82,0xfe,0xfe,0x92,0xba,0x82,0xc6,0x00}, // E
+	{0x82,0xfe,0xfe,0x90,0x98,0xfe,0x66,0x00}, // R
+	{0x00,0xc6,0x82,0xfe,0xfe,0x82,0xc6,0x00}, // I 
+	{0x44,0xe6,0xb2,0x92,0x9a,0xce,0x44,0x00}, // S 
+	{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}, // _
+	{0x38,0x7c,0xc6,0x82,0x82,0xc6,0x44,0x00}, // C
+	{0x7c,0xfe,0x82,0x82,0x82,0xfe,0x7c,0x00}, // O
+	{0x00,0x66,0x66,0x00,0x00,0x00,0x00,0x00}, // :
+	{0x7c,0xfe,0x8a,0x92,0xa2,0xfe,0x7c,0x00}, // 0
+	{0x00,0x02,0x42,0xfe,0xfe,0x02,0x02,0x00}, // 1
+	{0x42,0xc6,0x8e,0x9a,0x92,0xf6,0x66,0x00}, // 2
+	{0x44,0xc6,0x92,0x92,0x92,0xfe,0x6c,0x00}, // 3
+	{0x18,0x38,0x68,0xca,0xfe,0xfe,0x0a,0x00}, // 4
+	{0xf4,0xf6,0x92,0x92,0x92,0x9e,0x8c,0x00}, // 5
+	{0x3c,0x7e,0xd2,0x92,0x92,0x1e,0x0c,0x00}, // 6
+	{0xc0,0xc0,0x8e,0x9e,0xb0,0xe0,0xc0,0x00}, // 7
+	{0x6c,0xfe,0x92,0x92,0x92,0xfe,0x6c,0x00}, // 8
+	{0x60,0xf2,0x92,0x92,0x96,0xfc,0x78,0x00}  // 9
 };
+char character[] = { 'T', 'E', 'R', 'I', 'S', ' ', 'C', 'O', ':', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
 int isStarted = 0;
 int isOngoing = 0;
@@ -55,14 +68,22 @@ void scrollingChar(unsigned int speed, int n){
 		}
 	}
 }
-void scrollingText(int speed){
+void scrollingText(char text[], int speed){
 	while(1){
-		for(int i = 0; i <= 6; i++){
+		if(PINB == 0x01){
+			score = 0;
+			return;
+		}
+		for(int i = 0; i < strlen(text); i++){
 			if(PINB == 0x01){
+				score = 0;
 				return;
 			}
-			scrollingChar(speed, i);
-			sei();
+			for(int j = 0; j < sizeof(character); j++){
+				if(text[i] == character[j]){
+					scrollingChar(speed, j);
+				}
+			}
 		}
 	}
 
@@ -77,195 +98,6 @@ int getRow(int x) {
 
 void lightLED(int r, int c){
 	board[r][c] = 1;
-}
-
-void make_heart_1F(){
-	for(int i = 11; i <=16; i++){
-		for(int j = 1; j <=8; j++){
-			if(i == 11 && (j == 4 || j ==5 || j == 1 || j == 8)) j = j;
-			else if(i == 14 && (j == 1 || j == 8)) j = j;
-			else if(i == 15 && (j == 1 || j == 8 || j == 2 || j == 7)) j = j;
-			else if(i == 16 && (j == 1 || j == 8 || j == 2 || j == 7 || j == 3 || j == 6)) j = j;
-			else lightLED(i,j);
-		}
-	}
-}
-void make_heart_1(){
-	for(int i = 11; i <=16; i++){
-		for(int j = 1; j <=8; j++){
-			if(i == 11 && (j == 2 || j ==3 || j == 6 || j == 7)) 
-				lightLED(i,j);
-			else if(i == 12 && (j == 4 || j ==5 || j == 1 || j == 8)) 
-				lightLED(i,j);
-			else if(i == 13 && (j == 1 || j == 8)) 
-				lightLED(i,j);
-			else if(i == 14 && (j == 2 || j == 7)) 
-				lightLED(i,j);
-			else if(i == 15 && (j == 3 || j == 6)) 
-				lightLED(i,j);
-			else if(i == 16 && (j == 4 || j == 5)) 
-				lightLED(i,j);
-			else j = j;
-		}
-	}
-}
-void make_heart_2(){
-	for(int i = 11; i <=17; i++){
-		for(int j = 1; j <=8; j++){
-			if(i == 11 && (j == 2 || j ==3 || j == 6 || j == 7)) 
-				lightLED(i,j);
-			else if(i == 12 && (j == 4 || j ==5 || j == 1 || j == 8)) 
-				lightLED(i,j);
-			else if(i == 13 && (j == 1 || j == 8)) 
-				lightLED(i,j);
-			else if(i == 14 && (j == 1 || j == 8)) 
-				lightLED(i,j);
-			else if(i == 15 && (j == 2 || j == 7)) 
-				lightLED(i,j);
-			else if(i == 16 && (j == 3 || j == 6)) 
-				lightLED(i,j);
-			else if(i == 17 && (j == 4 || j == 5)) 
-				lightLED(i,j);
-			else j = j;
-		}
-	}
-}
-void make_heart_2F(){
-	for(int i = 11; i <=17; i++){
-		for(int j = 1; j <=8; j++){
-			if(i == 11 && (j == 4 || j ==5 || j == 1 || j == 8)) j = j;
-			else if(i == 15 && (j == 1 || j == 8)) j = j;
-			else if(i == 16 && (j == 1 || j == 8 || j == 2 || j == 7)) j = j;
-			else if(i == 17 && (j == 1 || j == 8 || j == 2 || j == 7 || j == 3 || j == 6)) j = j;
-			else lightLED(i,j);
-		}
-	}
-}
-void make_0(int r, int c){
-	lightLED(r-1, c-1);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c+1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c-1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-	lightLED(r+1, c+1);
-}
-void make_1(int r, int c){
-	lightLED(r, c);
-	lightLED(r+1, c);
-	lightLED(r+2, c);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c+1);
-	lightLED(r-1, c);
-	lightLED(r-2, c);
-	lightLED(r-1, c+1);
-}
-void make_2(int r, int c){
-	lightLED(r, c);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c-1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c+1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-}
-void make_3(int r, int c){
-	lightLED(r, c);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c+1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c+1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-}
-void make_4(int r, int c){
-	lightLED(r, c);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c+1);
-	lightLED(r-2, c+1);
-	lightLED(r-1, c-1);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c+1);
-	lightLED(r+2, c+1);
-}
-void make_5(int r, int c){
-	lightLED(r, c);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c+1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c-1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-}
-void make_6(int r, int c){
-	lightLED(r, c);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c-1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c+1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-	lightLED(r+1, c-1);
-}
-void make_7(int r, int c){
-	lightLED(r, c-1);
-	lightLED(r+1, c-1);
-	lightLED(r+2, c-1);
-	lightLED(r-1, c-1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-}
-void make_8(int r, int c){
-	lightLED(r, c);
-	lightLED(r-1, c-1);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c+1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+1, c-1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-	lightLED(r+1, c+1);
-}
-void make_9(int r, int c){
-	lightLED(r, c);
-	lightLED(r-1, c-1);
-	lightLED(r, c+1);
-	lightLED(r, c-1);
-	lightLED(r-1, c+1);
-	lightLED(r-2, c+1);
-	lightLED(r-2, c);
-	lightLED(r-2, c-1);
-	lightLED(r+2, c-1);
-	lightLED(r+2, c);
-	lightLED(r+2, c+1);
-	lightLED(r+1, c-1);
 }
 
 int makeT(int r, int c){
@@ -722,7 +554,7 @@ ISR(INT2_vect)
 	makeBLOCK(curX,curY,type);
 }
 void move_player_left(){
-	if(curX == 0) return;
+	if(curX == 1) return;
 	removeBLOCKS(curX, curY, type);
 	oldY = curY;
 	curY++;
@@ -766,7 +598,10 @@ void move_player_down(){
 		return;
 	}
 	while(isPressDown()){
-		if(checkbottom_collision() ){
+		if(checkbottom_collision()){
+			if(clearMatchedRow()){
+				makeBOARD(60);
+			}
 			curX = 1;
 			curY = 4;
 			type = rand() % 6 +1;
@@ -807,74 +642,14 @@ int check_GameOver()
 	}
 	return 0;
 }
-void get_num_to_display(int num, int col){
-	switch(num){
-		case 0:
-			make_0(6, col);
-			break;
-		case 1:	
-			make_1(6, col);
-			break;
-		case 2:	
-			make_2(6, col);
-			break;
-		case 3:	
-			make_3(6, col);
-			break;
-		case 4:	
-			make_4(6, col);
-			break;
-		case 5:	
-			make_5(6, col);
-			break;
-		case 6:	
-			make_6(6, col);
-			break;
-		case 7:	
-			make_7(6, col);
-			break;
-		case 8:	
-			make_8(6, col);
-			break;
-		case 9:	
-			make_9(6, col);
-			break;
-	}
+
+void score_display(int n_score){
+	memset(tmp_LED, 0, sizeof(tmp_LED));
+	char result[20];
+	snprintf(result, sizeof(result), "SCORE:%d  ", n_score);
+	scrollingText(result, 2);
 }
 
-void score_display(int num, int col){
-	int x = num % 10;
-	int y = num / 10;
-	while(1){
-		if(PINB == 0x01) return;
-		make_heart_1F();
-		get_num_to_display(y, col);
-		get_num_to_display(x, col-4);
-		makeBOARD(60);
-		memset(board, 0, sizeof(board));
-		
-		if(PINB == 0x01) return;
-		make_heart_1();
-		get_num_to_display(y, col);
-		get_num_to_display(x, col-4);
-		makeBOARD(60);
-		memset(board, 0, sizeof(board));
-
-		if(PINB == 0x01) return;
-		make_heart_2();
-		get_num_to_display(y, col);
-		get_num_to_display(x, col-4);
-		makeBOARD(60);
-		memset(board, 0, sizeof(board));
-
-		if(PINB == 0x01) return;
-		make_heart_2F();
-		get_num_to_display(y, col);
-		get_num_to_display(x, col-4);
-		makeBOARD(60);
-		memset(board, 0, sizeof(board));
-	}
-}
 void Play()
 {
 	if(isStarted ==0) return;
@@ -888,7 +663,7 @@ void Play()
 		isOngoing=1;
 		curX = 1;
 		curY = 4;
-		score_display(score, 6);
+		score_display(score);
 	}
 	
 	if (curX == 1)
@@ -903,7 +678,7 @@ void Play()
 		removeBLOCKS(curX, curY, type);
 		curX++;
 		makeBLOCK(curX, curY, type);
-		makeBOARD(60);
+		makeBOARD(45);
 		return;
 	}
 	else{
@@ -953,15 +728,13 @@ int main(void)
 			makeBOARD(60);
 		}
 		if(isStarted == 0 && isOngoing == 0){
-			scrollingText(10);
+			scrollingText("TETRIS  ",5);
 		}
 		if (isStarted==1 && isOngoing ==1){
-			score = 0;
 			Play();
 		}
 		else if(isStarted == 1 && isOngoing==0)
 		{
-			// game going normally, board filled
 			uint8_t temp = PINB & 0x01;
 			if(temp==0x01)
 			{
@@ -969,9 +742,7 @@ int main(void)
 				isOngoing=1;
 			}
 		}
-		else
-		// initial
-		if(PINB==0b00000001)
+		else if(PINB==0b00000001)
 		{
 			isStarted =1;
 			isOngoing=1;
